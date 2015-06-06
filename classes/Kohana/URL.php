@@ -75,7 +75,7 @@ class Kohana_URL {
 				$port = ':'.$port;
 			}
 
-			if ($domain = parse_url($base_url, PHP_URL_HOST))
+			if ($host = parse_url($base_url, PHP_URL_HOST))
 			{
 				// Remove everything but the path from the URL
 				$base_url = parse_url($base_url, PHP_URL_PATH);
@@ -83,11 +83,11 @@ class Kohana_URL {
 			else
 			{
 				// Attempt to use HTTP_HOST and fallback to SERVER_NAME
-				$domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
+				$host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
 			}
 
 			// Add the protocol and domain to the base URL
-			$base_url = $protocol.'://'.$domain.$port.$base_url;
+			$base_url = $protocol.'://'.$host.$port.$base_url;
 		}
 
 		return $base_url;
