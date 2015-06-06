@@ -84,6 +84,27 @@ class Kohana_URL {
 			{
 				// Attempt to use HTTP_HOST and fallback to SERVER_NAME
 				$host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
+
+				// make $host lowercase
+				$host = strtolower($host);
+
+				// check that host does not contain forbidden characters (see RFC 952 and RFC 2181)
+				// use preg_replace() instead of preg_match() to prevent DoS attacks with long host names
+				if ($host && '' !== preg_replace('/(?:^\[)?[a-zA-Z0-9-:\]_]+\.?/', '', $host)) {
+					throw new Kohana_Exception(
+						'Invalid host :host',
+						array(':host' => $host)
+					);
+				}
+
+				// Validate $host, see if it matches trusted hosts
+				if ( ! static::is_trusted_host($host))
+				{
+					throw new Kohana_Exception(
+						'Untrusted host :host',
+						array(':host' => $host)
+					);
+				}
 			}
 
 			// Add the protocol and domain to the base URL
@@ -210,4 +231,40 @@ class Kohana_URL {
 		return trim($title, $separator);
 	}
 
+	/**
+	 * Test if given $host should be trusted.
+	 *
+	 * Tests against given $trusted_hosts
+	 * or looks for key `trusted_hosts` in `url` config
+	 *
+	 * @param string $host
+	 * @param array $trusted_hosts
+	 * @return boolean TRUE if $host is trustworthy
+	 */
+	public static function is_trusted_host($host, array $trusted_hosts = NULL)
+	{
+
+		// If list of trusted hosts is not directly provided read from config
+		if (empty($trusted_hosts))
+		{
+			$trusted_hosts = (array) Kohana::$config->load('url')->get('trusted_hosts');
+		}
+
+		// loop through the $trusted_hosts array for a match
+		foreach ($trusted_hosts as $trusted_host) {
+
+			// make sure we fully match the trusted hosts
+			$pattern = '#^'.$trusted_host.'$#uD';
+
+			// return TRUE if there is match
+			if (preg_match($pattern, $host)) {
+				return TRUE;
+			}
+
+		}
+
+		// return FALSE as nothing is matched
+		return FALSE;
+
+	}
 }
