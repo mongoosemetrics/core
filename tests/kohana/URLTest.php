@@ -16,6 +16,18 @@
  */
 class Kohana_URLTest extends Unittest_TestCase
 {
+
+	/**
+	 * Sets up the environment
+	 */
+	// @codingStandardsIgnoreStart
+	public function setUp()
+	// @codingStandardsIgnoreEnd
+	{
+		parent::setUp();
+		Kohana::$config->load('url')->set('trusted_hosts', array('example\.com', 'example\.org'));
+	}
+
 	/**
 	 * Default values for the environment, see setEnvironment
 	 * @var array
